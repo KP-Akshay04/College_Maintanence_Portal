@@ -1,0 +1,586 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Principal Dashboard | Maintenance Portal</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="{% static 'css/admin.css' %}">
+
+  <style>
+    /* page layout */
+    html, body { height:100%; margin:0; display:flex; flex-direction:column; background:#f8f9fa; }
+    main { flex:1; }
+    footer { background:#003366; color:#fff; text-align:center; padding:12px 0; margin-top:auto; }
+
+    /* table */
+    .table-responsive.fixed-height { min-height:350px; max-height:520px; overflow-y:auto; }
+
+    th.position-relative { position: relative; } /* so dropdowns inside th align to header */
+
+    /* header-column dropdown */
+    .col-filter-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      z-index: 1200;
+      min-width: 160px;
+      display: none;
+      padding: 6px 0;
+    }
+    .col-filter-dropdown.active { display:block; }
+    .col-filter-dropdown button {
+      display:block;
+      width:100%;
+      background:none;
+      border:none;
+      padding:8px 12px;
+      text-align:left;
+      font-weight:500;
+      color:#003366;
+      cursor:pointer;
+    }
+    .col-filter-dropdown button:hover { background:#003366; color:#fff; }
+
+    .filter-icon { margin-left:6px; cursor:pointer; color:#cfd8e3; }
+    .filter-icon.active { color:#fff; transform:rotate(180deg); }
+
+    /* status badges */
+    .status.Pending { background:#ffc107; color:#fff; padding:4px 8px; border-radius:10px; }
+    .status.Approved { background:#28a745; color:#fff; padding:4px 8px; border-radius:10px; }
+    .status.Rejected { background:#dc3545; color:#fff; padding:4px 8px; border-radius:10px; }
+
+    /* keep table width stable */
+    table { table-layout: fixed; word-wrap:break-word; }
+
+    /* Table header - match navbar color */
+    #requestTable thead.table-dark {
+      background-color: #003366 !important;
+    }
+
+    #requestTable thead.table-dark th {
+      background-color: #003366 !important;
+      border-color: #003366;
+      color: #fff;
+    }
+
+    /* Filter icon in table header should be white when active */
+    #requestTable thead.table-dark .filter-icon {
+      color: #cfd8e3;
+    }
+
+    #requestTable thead.table-dark .filter-icon:hover,
+    #requestTable thead.table-dark .filter-icon.active {
+      color: #fff;
+    }
+
+    /* Maintenance Requests Table Header - Match Navbar Color */
+    #requestTable thead.maintenance-table-header {
+      background-color: #003366;
+      color: #fff;
+    }
+
+    #requestTable thead.maintenance-table-header th {
+      background-color: #003366;
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+    }
+
+    #requestTable thead.maintenance-table-header th:hover {
+      background-color: #003366;
+    }
+
+    /* Filter icons in table header */
+    #requestTable thead.maintenance-table-header .filter-icon {
+      color: #cfd8e3;
+      transition: color 0.2s;
+    }
+
+    #requestTable thead.maintenance-table-header .filter-icon:hover,
+    #requestTable thead.maintenance-table-header .filter-icon.active {
+      color: #fff;
+    }
+
+    /* Ensure checkbox in header is visible */
+    #requestTable thead.maintenance-table-header th input[type="checkbox"] {
+      cursor: pointer;
+    }
+
+    /* Quotation Link Area */
+    #generatedLinkArea {
+      width: 100%;
+    }
+    
+    #generatedLinkArea .alert {
+      margin-bottom: 0;
+    }
+    
+    #quotationLinkInput {
+      font-size: 0.875rem;
+      font-family: monospace;
+    }
+    
+    #copyLinkBtn {
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    
+    @media (max-width: 768px) {
+      #generatedLinkArea .d-flex {
+        flex-direction: column;
+      }
+      
+      #copyLinkBtn {
+        width: 100%;
+        margin-top: 8px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background:#003366;">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{% url 'admin_dashboard' %}">College Maintenance Portal</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navCollapse">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navCollapse">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+
+          <!-- NAVBAR department dropdown (uses .navbar-dept-filter items below) -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navDeptMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Department
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navDeptMenu">
+              <li><a class="dropdown-item navbar-dept-filter" href="#" data-dept="">All Departments</a></li>
+              {% for d in departments %}
+              <li><a class="dropdown-item navbar-dept-filter" href="#" data-dept="{{ d }}">{{ d }}</a></li>
+              {% endfor %}
+            </ul>
+          </li>
+
+          <li class="nav-item"><a class="nav-link" href="{% url 'principal_view_quotations' %}">View Quotations</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'reports' %}">Reports</a></li>
+
+          <li class="nav-item ms-2">
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+              <button class="btn btn-warning btn-sm fw-semibold">Logout</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="container mt-4">
+    <h1 class="text-center mb-2">Principal’s Dashboard</h1>
+    <p class="text-center text-muted mb-4">Select requests and send them to companies for quotations.</p>
+
+    {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} mb-2" role="alert">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Status summary cards -->
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-md-3">
+        <a href="{% url 'admin_dashboard' %}" class="text-decoration-none">
+          <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+              <div class="text-muted small">Total</div>
+              <div class="display-6 fw-bold text-dark">{{ total }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'admin_dashboard' %}?status=Pending" class="text-decoration-none">
+          <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+              <div class="text-muted small">Pending</div>
+              <div class="display-6 fw-bold text-warning">{{ pending }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'admin_dashboard' %}?status=Approved" class="text-decoration-none">
+          <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+              <div class="text-muted small">Approved</div>
+              <div class="display-6 fw-bold text-success">{{ approved }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a href="{% url 'admin_dashboard' %}?status=Rejected" class="text-decoration-none">
+          <div class="card shadow-sm border-0">
+            <div class="card-body text-center">
+              <div class="text-muted small">Rejected</div>
+              <div class="display-6 fw-bold text-danger">{{ rejected }}</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="card p-3 shadow-sm">
+      <h4 class="mb-3 text-center">Maintenance Requests</h4>
+
+      {% if requests %}
+      <div class="table-responsive fixed-height">
+        <table class="table table-hover align-middle text-center" id="requestTable">
+          <thead class="maintenance-table-header">
+            <tr>
+              <th style="width:48px"><input id="selectAll" type="checkbox"></th>
+              <th style="width:60px">ID</th>
+
+              <!-- Department header: th is position-relative, dropdown inside it -->
+              <th class="position-relative" style="width:160px; text-align:left;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <span>Department</span>
+                  <i class="bi bi-chevron-down filter-icon" id="colDeptIcon" title="Filter Department"></i>
+                </div>
+
+                <!-- column dropdown inside the th so it is positioned correctly -->
+                <div class="col-filter-dropdown" id="colDeptDropdown" aria-hidden="true">
+                  <button type="button" data-filter="">All Departments</button>
+                  {% for d in departments %}
+                  <button type="button" data-filter="{{ d }}">{{ d }}</button>
+                  {% endfor %}
+                </div>
+              </th>
+
+              <th style="text-align:left">Title</th>
+              <th style="width:150px">Date</th>
+
+              <!-- Status header -->
+              <th class="position-relative" style="width:120px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <span>Status</span>
+                  <i class="bi bi-chevron-down filter-icon" id="colStatusIcon" title="Filter Status"></i>
+                </div>
+
+                <div class="col-filter-dropdown" id="colStatusDropdown" aria-hidden="true">
+                  <button type="button" data-filter="">All Status</button>
+                  <button type="button" data-filter="Pending">Pending</button>
+                  <button type="button" data-filter="Approved">Approved</button>
+                  <button type="button" data-filter="Rejected">Rejected</button>
+                </div>
+              </th>
+
+              <th style="width:180px">Actions</th>
+              <th style="width:80px">View</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for r in requests %}
+            <tr>
+              <td><input class="req-checkbox" data-id="{{ r.id }}" type="checkbox" value="{{ r.id }}"></td>
+              <td>{{ r.id }}</td>
+              <td class="dept-cell text-start">{{ r.branch }}</td>
+              <td class="text-start">{{ r.title }}</td>
+              <td>{{ r.date_submitted|date:"d M Y, H:i" }}</td>
+              <td class="status-cell"><span class="status {{ r.status }}">{{ r.status }}</span></td>
+              <td>
+                <form method="post" action="{% url 'approve_request' r.id %}" class="d-inline ajax-form">{% csrf_token %}
+                  <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                </form>
+                <form method="post" action="{% url 'reject_request' r.id %}" class="d-inline ms-1 ajax-form">{% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                </form>
+              </td>
+              <td><a class="btn btn-primary btn-sm" href="{% url 'request_detail' r.id %}">View</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Quotation actions -->
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-3">
+        <div class="d-flex gap-2">
+          <button type="button" id="sendQuotationBtn" class="btn btn-warning">Send Selected to Quotation</button>
+        </div>
+        <div id="generatedLinkArea" style="word-break:break-all;"></div>
+      </div>
+
+      {% else %}
+      <p class="text-center text-muted my-4">No maintenance requests available.</p>
+      {% endif %}
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Masood | Musthak | Rithwik | Akshay | Milan</p>
+    <small>© Tech Mavericks | All Rights Reserved</small>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // elements
+      const colDeptIcon = document.getElementById('colDeptIcon');
+      const colDeptDropdown = document.getElementById('colDeptDropdown');
+      const colStatusIcon = document.getElementById('colStatusIcon');
+      const colStatusDropdown = document.getElementById('colStatusDropdown');
+      const navbarDeptItems = document.querySelectorAll('.navbar-dept-filter, .navbar-dept-filter'); // (some templates may have different classes)
+      const rows = Array.from(document.querySelectorAll('#requestTable tbody tr'));
+
+      // helper: open/close dropdowns (only one open at a time)
+      function closeAllColumnDropdowns() {
+        colDeptDropdown.classList.remove('active');
+        colStatusDropdown.classList.remove('active');
+        colDeptIcon.classList.remove('active');
+        colStatusIcon.classList.remove('active');
+      }
+
+      // filter functions used by header dropdowns and navbar items
+      function filterByDept(dept) {
+        rows.forEach(row => {
+          // keep current display state from other filters: we'll recalc using both filters
+          // For simplicity here we apply dept filter on top of whatever is currently visible.
+          const currentStatusVisible = row.style.display !== 'none';
+          const rowDept = row.querySelector('.dept-cell')?.textContent.trim() || '';
+          const deptMatch = !dept || rowDept === dept;
+          // if row is currently hidden by other filter (status) we should keep it hidden
+          row.style.display = (deptMatch && (row.getAttribute('data-status-hidden') !== 'true')) ? '' : (deptMatch ? '' : 'none');
+        });
+      }
+
+      function filterByStatus(status) {
+        rows.forEach(row => {
+          const rowStatusText = row.querySelector('.status-cell')?.textContent.trim() || '';
+          const statusMatch = !status || rowStatusText === status;
+          // mark rows hidden by status so dept filter won't unhide them incorrectly
+          if (!statusMatch) {
+            row.style.display = 'none';
+            row.setAttribute('data-status-hidden', 'true');
+          } else {
+            row.removeAttribute('data-status-hidden');
+            // only show if dept isn't hiding it
+            const deptDropdownVal = colDeptDropdown.querySelector('button.active')?.dataset.filter || '';
+            const rowDept = row.querySelector('.dept-cell')?.textContent.trim() || '';
+            if (!deptDropdownVal || deptDropdownVal === '' || deptDropdownVal === rowDept) {
+              row.style.display = '';
+            }
+          }
+        });
+      }
+
+      // Simpler combined logic: we will instead apply both filters together each time
+      function applyCombinedFilters(deptFilterVal, statusFilterVal) {
+        rows.forEach(row => {
+          const rowDept = row.querySelector('.dept-cell')?.textContent.trim() || '';
+          const rowStatus = row.querySelector('.status-cell')?.textContent.trim() || '';
+          const matchDept = !deptFilterVal || deptFilterVal === '' || rowDept === deptFilterVal;
+          const matchStatus = !statusFilterVal || statusFilterVal === '' || rowStatus === statusFilterVal;
+          row.style.display = (matchDept && matchStatus) ? '' : 'none';
+        });
+      }
+
+      // Track current selections
+      let currentDeptFilter = '';
+      let currentStatusFilter = '';
+
+      // open/close when clicking icons; dropdown positioned inside th so no manual coords needed
+      colDeptIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const nowOpen = colDeptDropdown.classList.toggle('active');
+        colDeptIcon.classList.toggle('active', nowOpen);
+        // close other
+        colStatusDropdown.classList.remove('active');
+        colStatusIcon.classList.remove('active');
+      });
+
+      colStatusIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const nowOpen = colStatusDropdown.classList.toggle('active');
+        colStatusIcon.classList.toggle('active', nowOpen);
+        // close other
+        colDeptDropdown.classList.remove('active');
+        colDeptIcon.classList.remove('active');
+      });
+
+      // clicking outside closes dropdowns
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.col-filter-dropdown') && !e.target.classList.contains('filter-icon')) {
+          closeAllColumnDropdowns();
+        }
+      });
+
+      // header column dropdown buttons: mark active visually and set filter
+      colDeptDropdown.querySelectorAll('button[data-filter]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          // visually mark selected: remove active class from siblings
+          colDeptDropdown.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          currentDeptFilter = btn.dataset.filter || '';
+          applyCombinedFilters(currentDeptFilter, currentStatusFilter);
+          closeAllColumnDropdowns();
+        });
+      });
+
+      colStatusDropdown.querySelectorAll('button[data-filter]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          colStatusDropdown.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          currentStatusFilter = btn.dataset.filter || '';
+          applyCombinedFilters(currentDeptFilter, currentStatusFilter);
+          closeAllColumnDropdowns();
+        });
+      });
+
+      // Navbar department items (prevent default navigation and apply filter)
+      document.querySelectorAll('.navbar-dept-filter').forEach(a => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault(); // prevent the anchor navigation
+          const val = a.dataset.dept || '';
+          // reflect selection in header dropdown (optional)
+          colDeptDropdown.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          const matchedBtn = Array.from(colDeptDropdown.querySelectorAll('button')).find(b => (b.dataset.filter || '') === val);
+          if (matchedBtn) matchedBtn.classList.add('active');
+
+          currentDeptFilter = val;
+          applyCombinedFilters(currentDeptFilter, currentStatusFilter);
+
+          // close the navbar bootstrap dropdown (Bootstrap will close it automatically when item clicked)
+          // also ensure any header dropdown is closed
+          closeAllColumnDropdowns();
+        });
+      });
+
+      // "All Departments" in navbar uses data-dept=""
+      // also add a "Reset filters" helper if desired (not shown by default)
+
+      // Select All checkbox behavior
+      const selectAllCheckbox = document.getElementById('selectAll');
+      selectAllCheckbox?.addEventListener('change', (e) => {
+        const checked = e.target.checked;
+        document.querySelectorAll('.req-checkbox').forEach(cb => cb.checked = checked);
+      });
+
+      // Quotation button: Generate link and show copy button
+      const sendBtn = document.getElementById('sendQuotationBtn');
+      const generateUrl = "{% url 'generate_quotation_link' %}";
+      const csrfToken = "{{ csrf_token }}";
+      const generatedLinkArea = document.getElementById('generatedLinkArea');
+      
+      sendBtn?.addEventListener('click', async () => {
+        const selected = Array.from(document.querySelectorAll('.req-checkbox:checked')).map(i => i.value);
+        if (!selected.length) { 
+          alert('Please select at least one request.'); 
+          return; 
+        }
+        
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Generating...';
+        
+        try {
+          const fd = new FormData();
+          selected.forEach(id => fd.append('selected_requests[]', id));
+          fd.append('csrfmiddlewaretoken', csrfToken);
+          
+          const res = await fetch(generateUrl, { 
+            method:'POST', 
+            body: fd, 
+            headers: {'X-Requested-With':'XMLHttpRequest'} 
+          });
+          
+          const data = await res.json();
+          
+          if (data.success) {
+            generatedLinkArea.innerHTML = `
+              <div class="alert alert-success mb-2">
+                <strong>✅ Quotation link generated successfully!</strong><br>
+                <small>Share this link with vendors:</small><br>
+                <div class="d-flex align-items-center gap-2 mt-2">
+                  <input type="text" class="form-control form-control-sm" id="quotationLinkInput" value="${data.link}" readonly style="flex: 1;">
+                  <button id="copyLinkBtn" class="btn btn-primary btn-sm" title="Copy link">
+                    <i class="bi bi-clipboard"></i> Copy
+                  </button>
+                </div>
+                <a href="${data.link}" target="_blank" class="text-break small d-block mt-2">${data.link}</a>
+              </div>
+            `;
+            
+            // Add copy button functionality
+            const copyBtn = document.getElementById('copyLinkBtn');
+            const linkInput = document.getElementById('quotationLinkInput');
+            
+            copyBtn.addEventListener('click', async () => {
+              try {
+                // Try using the Clipboard API (modern browsers)
+                await navigator.clipboard.writeText(data.link);
+                copyBtn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                copyBtn.classList.remove('btn-primary');
+                copyBtn.classList.add('btn-success');
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                  copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+                  copyBtn.classList.remove('btn-success');
+                  copyBtn.classList.add('btn-primary');
+                }, 2000);
+              } catch (err) {
+                // Fallback for older browsers
+                linkInput.select();
+                linkInput.setSelectionRange(0, 99999); // For mobile devices
+                try {
+                  document.execCommand('copy');
+                  copyBtn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                  copyBtn.classList.remove('btn-primary');
+                  copyBtn.classList.add('btn-success');
+                  
+                  setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copy';
+                    copyBtn.classList.remove('btn-success');
+                    copyBtn.classList.add('btn-primary');
+                  }, 2000);
+                } catch (fallbackErr) {
+                  alert('Failed to copy. Please copy manually: ' + data.link);
+                }
+              }
+            });
+          } else {
+            generatedLinkArea.innerHTML = `<div class="alert alert-danger">${data.message || 'Failed to generate link'}</div>`;
+          }
+        } catch (err) {
+          console.error(err);
+          generatedLinkArea.innerHTML = `<div class="alert alert-danger">Error generating link. Please try again.</div>`;
+        } finally {
+          sendBtn.disabled = false;
+          sendBtn.textContent = 'Send Selected to Quotation';
+        }
+      });
+
+    }); // DOMContentLoaded
+  </script>
+</body>
+</html>

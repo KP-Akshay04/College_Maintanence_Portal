@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Maintenance Portal{% endblock %}</title>
+  <link rel="icon" href="{% static "images/logo4.jpg" %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+   <link rel="icon" href="{% static "images/logo3.png" %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+<header>
+  <nav class="navbar">
+    <div class="logo">College Maintenance Portal</div>
+
+
+    <ul class="nav-links" id="navLinks">
+      {% if user.is_authenticated %}
+      <li class="user-info">
+        <span class="navbar-text text-white">{{ user.username }}</span>
+      </li>
+      {% endif %}
+      <li>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="logout-btn">Logout</button>
+        </form>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<div class="container mt-4">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+  {% block content %}{% endblock %}
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const menuToggle = document.getElementById("menuToggle");
+  const navLinks = document.getElementById("navLinks");
+
+  menuToggle.addEventListener("click", () => {
+    navLinks.classList.toggle("show");
+  });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

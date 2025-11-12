@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="text-center mb-3">Quotations for Batch #{{ batch.id }}</h3>
+
+  {% if quotations %}
+    {% for q in quotations %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-body">
+        <h5 class="mb-1">{{ q.company_name }}</h5>
+        <p class="text-muted mb-3"><strong>Email:</strong> {{ q.email }}</p>
+
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Request ID</th>
+                <th>Device</th>
+                <th>Brand</th>
+                <th>Quantity</th>
+                <th>Price (₹)</th>
+                <th>Subtotal (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in q.items.all %}
+              <tr>
+                <td>{{ item.request_id }}</td>
+                <td>{{ item.device }}</td>
+                <td>{{ item.brand }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.subtotal }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <h6 class="text-end mt-2">
+          <strong>Total Amount:</strong> ₹{{ q.total_amount }}
+        </h6>
+
+        {% if q.selected %}
+          <div class="alert alert-success text-center mt-3 mb-0">
+            ✅ This quotation has been selected
+          </div>
+        {% else %}
+          <form method="post" action="{% url 'select_quotation' q.id %}" class="text-center mt-3 mb-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success px-4">
+              Select This Quotation
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="text-center text-muted">No quotations submitted yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

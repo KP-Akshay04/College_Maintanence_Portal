@@ -1,0 +1,249 @@
+/* ========== Global Reset ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ========== Body Background ========== */
+body {
+  height: 100vh;
+  background: linear-gradient(135deg, #00008B, #764ba2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* ========== Floating Background Circles ========== */
+.background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  animation: float 10s infinite ease-in-out alternate;
+}
+
+.circle:nth-child(1) {
+  width: 180px;
+  height: 180px;
+  top: 10%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.circle:nth-child(2) {
+  width: 250px;
+  height: 250px;
+  bottom: 15%;
+  right: 20%;
+  animation-delay: 2s;
+}
+
+.circle:nth-child(3) {
+  width: 100px;
+  height: 100px;
+  bottom: 10%;
+  left: 30%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-40px);
+  }
+}
+
+/* ========== Login Box ========== */
+.login-container {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  padding: 2.5rem;
+  width: 370px;
+  border-radius: 20px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transform: translateY(40px);
+  opacity: 0;
+  animation: slideUp 1s forwards;
+}
+
+h2 {
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+/* ========== Input Fields ========== */
+.input-group {
+  text-align: left;
+  margin-bottom: 1.2rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 14px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.85);
+  color: #333;
+  transition: 0.3s;
+}
+
+.input-group input:focus {
+  box-shadow: 0 0 8px #667eea;
+}
+
+/* ========== Password Visibility Icon ========== */
+.password-wrapper {
+  position: relative;
+}
+
+#togglePassword {
+  position: absolute;
+  right: 10px;
+  top: 9px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* ========== Button ========== */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #00008B, #764ba2);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ========== Error Message ========== */
+#error-message {
+  color: #ff4b4b;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* ========== Animations ========== */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== Loader ========== */
+.loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(102, 126, 234, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  z-index: 1000;
+}
+
+.loader.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top: 5px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* ========== Fade Out Transition ========== */
+body.fade-out {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+/* ========== Responsive Design ========== */
+@media (max-width: 480px) {
+  .login-container {
+    width: 90%;
+    padding: 1.8rem;
+    border-radius: 15px;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .input-group label {
+    font-size: 13px;
+  }
+
+  .input-group input {
+    padding: 9px;
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  .circle:nth-child(1),
+  .circle:nth-child(2),
+  .circle:nth-child(3) {
+    opacity: 0.3;
+    filter: blur(2px);
+  }
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    width: 80%;
+  }
+}

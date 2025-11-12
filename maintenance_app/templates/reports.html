@@ -1,0 +1,200 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reports | College Maintenance</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="{% static 'css/reports.css' %}">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background:#003366;">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{% url 'admin_dashboard' %}">College Maintenance Portal</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navCollapse">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navCollapse">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Departments</a></li>
+          <li class="nav-item"><a class="nav-link active" href="{% url 'reports' %}">Reports</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Staff</a></li>
+          <li class="nav-item ms-2">
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+              <button class="btn btn-danger btn-sm fw-semibold">Logout</button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="reports-page">
+    <div class="reports-header">
+      <h1>Maintenance Reports</h1>
+      <p>Filter and view approved vendor quotations. Choose a quick range or pick a custom date.</p>
+    </div>
+
+    {% if messages %}
+    <div class="mb-3">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} mb-2" role="alert">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Filter Row -->
+    <div class="filter-row">
+      <span class="filter-label">Show:</span>
+      <div class="filter-buttons">
+        <button type="button" class="filter-btn active" data-filter="week">This Week</button>
+        <button type="button" class="filter-btn" data-filter="month">This Month</button>
+        <button type="button" class="filter-btn" data-filter="year">This Year</button>
+        <button type="button" class="filter-btn" data-filter="custom">Custom</button>
+      </div>
+
+      <!-- Department selector -->
+      <div class="th-select-wrapper ms-auto">
+        <label class="filter-label mb-0" for="departmentFilter">Department:</label>
+        <select id="departmentFilter" class="dept-filter">
+          <option value="All">All Departments</option>
+          {% for d in departments %}
+          <option value="{{ d }}">{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Custom Date Picker (hidden by default) -->
+      <div class="custom-picker" id="customPicker" aria-hidden="true" style="display:none;">
+        <label for="customDate">Pick Date:</label>
+        <input type="date" id="customDate" name="customDate">
+        <button type="button" class="apply-btn" id="applyCustom">Apply</button>
+      </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section">
+      <h2 id="resultsTitle">Showing: Approved quotations</h2>
+
+      <ul class="nav nav-tabs reports-tabs" id="reportsTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="reports-table-tab" data-bs-toggle="tab" data-bs-target="#reports-table" type="button" role="tab" aria-controls="reports-table" aria-selected="true">Reports</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="department-summary-tab" data-bs-toggle="tab" data-bs-target="#department-summary" type="button" role="tab" aria-controls="department-summary" aria-selected="false">Department Totals</button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="reportsTabContent">
+        <div class="tab-pane fade show active" id="reports-table" role="tabpanel" aria-labelledby="reports-table-tab">
+          <div class="table-section">
+            {% if requests %}
+            <table id="reportsTable">
+              <thead>
+                <tr>
+                  <th style="width:60px">ID</th>
+                  <th style="width:160px">Department</th>
+                  <th>Issue</th>
+                  <th style="width:150px">Date</th>
+                  <th style="width:120px">Status</th>
+                  <th style="width:130px" class="text-end">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in requests %}
+                <tr data-department="{{ r.branch }}" data-date="{{ r.date_submitted|date:'Y-m-d' }}" data-status="{{ r.status }}">
+                  <td>{{ r.id }}</td>
+                  <td>{{ r.branch }}</td>
+                  <td>{{ r.title }}</td>
+                  <td>{{ r.date_submitted|date:"d M Y" }}</td>
+                  <td>
+                    {% if r.status == 'Pending' %}
+                      <span class="status pending">Pending</span>
+                    {% elif r.status == 'Approved' %}
+                      <span class="status completed">Approved</span>
+                    {% elif r.status == 'Rejected' %}
+                      <span class="status rejected">Rejected</span>
+                    {% else %}
+                      <span class="status inprogress">{{ r.status }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-end">₹{{ r.approved_total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% else %}
+            <p class="text-center text-muted mb-0">No approved quotations found for the selected filters.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="department-summary" role="tabpanel" aria-labelledby="department-summary-tab">
+          <div class="table-section">
+            <div class="summary-card mb-3">
+              <div class="summary-card__controls">
+                <label for="summaryDepartment" class="summary-label">Department subtotal</label>
+                <select id="summaryDepartment" class="dept-filter">
+                  <option value="All">All Departments</option>
+                  {% for item in department_totals %}
+                  <option value="{{ item.branch }}">{{ item.branch }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="summary-card__value">
+                <span class="summary-amount" id="summaryAmount">₹0.00</span>
+              </div>
+            </div>
+
+            {% if department_totals %}
+            <table class="dept-summary-table">
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th class="text-end">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in department_totals %}
+                <tr>
+                  <td>{{ item.branch|default:"Not specified" }}</td>
+                  <td class="text-end">₹{{ item.department_total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="grand-total-row">
+                  <td><strong>All Departments</strong></td>
+                  <td class="text-end"><strong>₹{{ grand_total|floatformat:2 }}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+            {% else %}
+            <p class="text-center text-muted mb-0">No approved quotations available yet.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <p class="team-names">© 2025 College Maintenance Portal | Reports</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    window.DEPARTMENT_TOTALS = JSON.parse('{{ department_totals_json|default:'{}'|escapejs }}');
+    window.GRAND_TOTAL = {{ grand_total|default:0|floatformat:"2" }};
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/reports.js' %}"></script>
+</body>
+</html>

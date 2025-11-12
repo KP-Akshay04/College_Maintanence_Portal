@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KVG Polytechnic | Maintenance Portal</title>
+  <link rel="icon" href="{% static 'images/logo4.jpg' %}">
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="background">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+  </div>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="nav-left">
+      <img class="logo-img" src="{% static 'images/home1.png' %}" alt="KVG Logo" />
+      <div class="logo">KVG Polytechnic</div>
+    </div>
+
+    <div class="nav-right">
+      <img src="{% static 'images/logo1.png' %}" alt="Portal Logo" class="nav-logo">
+      <button id="menuToggle" class="menu-toggle" aria-label="Open Menu">
+        <i class="bx bx-menu"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Side Menu -->
+  <nav id="sideMenu" class="side-menu">
+    <button id="closeMenu" class="close-menu" aria-label="Close Menu">
+      <i class="bx bx-x"></i>
+    </button>
+    <ul class="side-list">
+      <li><a href="#home" class="side-link"><i class="bx bx-home"></i> Home</a></li>
+      <li><a href="#about-contact" class="side-link"><i class="bx bx-info-circle"></i> About</a></li>
+      <li><a href="#about-contact" class="side-link"><i class="bx bx-envelope"></i> Contact</a></li>
+      <li><a href="{% url 'login' %}" class="side-link"><i class="bx bx-log-in"></i> Login</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Overlay -->
+  <div id="pageOverlay" class="page-overlay"></div>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Welcome</h1>
+        <p>Empowering your campus with smarter maintenance management.</p>
+        <button class="main-btn" id="loginBtn">Login</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Info Section -->
+  <section class="info-section" id="about-contact">
+    <div class="about">
+      <h2>About the Portal</h2>
+      <p>
+        The College Maintenance Portal allows staff to send maintenance requests directly to the principal. 
+        The principal reviews each request and can either approve or reject it based on priority and need. 
+        Approved requests are forwarded to the staff. The portal also keeps track of item prices and expenses, 
+        helping in budget management and ensuring a smooth, transparent maintenance process within the college.
+      </p>
+    </div>
+    <div class="contact">
+      <h2>Contact Us</h2>
+      <p>
+        <a href="mailto:techmavericks26@gmail.com">Tech Mavericks</a> |
+        Email: techmavericks26@gmail.com |
+        Phone: +91 99725 87266
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer-box">
+    <p>Masood | Musthak | Rithwik | Akshay | Milan</p>
+    <p>© Tech Mavericks | All Rights Reserved</p>
+  </footer>
+
+  <script src="{% static 'js/homepage.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}New Request{% endblock %}
+  <link rel="icon" href="{% static "images/logo4.jpg" %}">
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+
+
+<div class="col-md-10 mx-auto">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h4 class="mb-3">New Maintenance Request</h4>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Branch</label>
+          <select name="branch" class="form-select" required>
+            <option value="">Select Branch</option>
+            <option>CSE</option>
+            <option>CE</option>
+            <option>EEE</option>
+            <option>ECE</option>
+            <option>ATE</option>
+            <option>ME</option>
+            <option>General</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Title</label>
+          <input type="text" name="title" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Description</label>
+          <textarea name="description" rows="3" class="form-control" required></textarea>
+        </div>
+
+        <hr>
+        <h5>Equipment List</h5>
+
+        <div class="table-responsive">
+          <table class="table table-bordered text-center align-middle" id="equipmentTable">
+            <thead class="table-light">
+              <tr>
+                <th>Select</th>
+                <th>Device</th>
+                <th>Brand/Model</th>
+                <th>Size</th>
+                <th>Price (₹)</th>
+                <th>Usage</th>
+                <th>Remarks</th>
+                <th>Quantity</th>
+                <th>Subtotal (₹)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in items %}
+              <tr>
+                <td><input type="checkbox" class="item-checkbox" data-price="{{ item.price }}"></td>
+                <td class="device">{{ item.device }}</td>
+                <td class="brand">{{ item.brand }}</td>
+                <td class="size">{{ item.size }}</td>
+                <td class="price">{{ item.price }}</td>
+                <td class="usage">{{ item.usage }}</td>
+                <td class="remarks">{{ item.remarks }}</td>
+                <td><input type="number" class="form-control qty-input" min="0" value="0" style="width:100px;"></td>
+                <td class="subtotal">0</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="text-end fw-bold mt-2">
+          <span>Total Amount: ₹<span id="grandTotal">0</span></span>
+        </div>
+
+        <!-- Hidden fields -->
+        <input type="hidden" name="selected_items" id="selectedItems">
+        <input type="hidden" name="total_amount" id="totalAmount">
+
+        <div class="mt-3 text-end">
+          <button class="btn btn-primary" type="submit">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Define empty existingItems for new page -->
+<script>
+  const existingItems = [];
+</script>
+
+<!-- Load JS at the end -->
+<script src="{% static 'js/request.js' %}"></script>
+
+{% endblock %}

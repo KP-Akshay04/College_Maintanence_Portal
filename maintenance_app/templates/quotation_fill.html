@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Quotation</title>
+  <link rel="stylesheet" href="{% static 'css/quotation.css' %}">
+  
+</head>
+
+<body>
+  <div class="container">
+    <h2>Submit Your Quotation</h2>
+
+    <!-- Django success message -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="message success" id="successMessage">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <label>Company Name:</label>
+      <input type="text" name="company_name" required>
+
+      <label>Email:</label>
+      <input type="email" name="email" required>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Request</th>
+            <th>Device</th>
+            <th>Brand</th>
+            <th>Quantity</th>
+            <th>Price (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td data-label="Request">{{ item.request_title }}</td>
+            <td data-label="Device">{{ item.device }}</td>
+            <td data-label="Brand">{{ item.brand }}</td>
+            <td data-label="Quantity">{{ item.quantity }}</td>
+            <td data-label="Price (₹)">
+              <input type="number" step="0.01" name="price_{{ item.request_id }}_{{ item.device }}" required>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <button type="submit" class="btn">Submit Quotation</button>
+    </form>
+  </div>
+
+  <script>
+    // Auto-hide success message after 3 seconds
+    const msg = document.getElementById("successMessage");
+    if (msg) {
+      msg.style.display = "block";
+      setTimeout(() => {
+        msg.style.opacity = "0";
+        msg.style.transition = "opacity 0.5s ease";
+        setTimeout(() => msg.remove(), 500);
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

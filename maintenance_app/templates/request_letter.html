@@ -1,0 +1,61 @@
+{% block content %}
+
+<div class="container my-4 p-4 border rounded shadow-sm bg-white">
+  <h4 class="text-center mb-4">Request Letter</h4>
+
+  <p><strong>To, <br></strong>   The Principal<br>KVG Polytechnic<br>Sullia, D.K</p>
+  <p><strong>From,<br></strong> {{ request_obj.hod.username }} <br> {{ request_obj.branch }}<br>KVG Polytechnic <br> Sullia, D.K</p>
+  <p><strong>Date:</strong> {{ request_obj.date_submitted|date:"d M Y" }}</p>
+
+  <hr>
+
+  <p><strong>Subject:</strong> {{ request_obj.title }}</p>
+  <p>{{ request_obj.description }}</p>
+
+  <hr>
+
+  {% if items %}
+  <h5 class="mt-4">Selected Equipment</h5>
+  <table class="table table-bordered text-center align-middle" style="border-collapse: collapse; width: 100%; font-size: 14px;">
+    <thead style="background-color: #f8f9fa;">
+      <tr>
+        <th>Device</th>
+        <th>Brand/Model</th>
+        <th>Size</th>
+        <th>Usage</th>
+        <th>Remarks</th>
+        <th>Qty</th>
+        <th>Price (₹)</th>
+        <th>Subtotal (₹)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.device }}</td>
+        <td>{{ item.brand }}</td>
+        <td>{{ item.size }}</td>
+        <td>{{ item.usage }}</td>
+        <td>{{ item.remarks }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.price }}</td>
+        <td>{{ item.subtotal }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="text-end mt-3"><strong>Total Amount: ₹{{ request_obj.total_amount }}</strong></p>
+  {% endif %}
+
+  <p class="mt-4">Kindly review and take necessary action.</p>
+
+  <p class="mt-5">Sincerely,</p>
+  <p>{{ request_obj.hod.username }} <br> KVG Polytechnic Sullia</p>
+
+
+  <b><p>*This Indent will be approved after the signature of the Principal</p></b>
+</div>
+
+
+{% endblock %}

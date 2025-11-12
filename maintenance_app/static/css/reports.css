@@ -1,0 +1,478 @@
+/* reports.css - matching admin dashboard fonts */
+* {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+:root {
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --accent: #003366;
+  --success: #28a745;
+  --warning: #ffc107;
+  --danger: #dc3545;
+  --radius: 10px;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: #333;
+  font-family: "Poppins", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* header/nav - using Bootstrap classes, so minimal custom styling */
+.navbar {
+  background: #003366 !important;
+}
+
+/* main */
+.reports-page {
+  max-width: 1200px;
+  margin: 28px auto;
+  padding: 0 20px;
+}
+
+/* header */
+.reports-header {
+  margin-bottom: 24px;
+}
+
+.reports-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #003366;
+  font-family: "Poppins", sans-serif;
+}
+
+.reports-header p {
+  margin: 0 0 18px 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+}
+
+/* controls */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  background: var(--card);
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.filter-label {
+  font-weight: 600;
+  margin-right: 6px;
+  color: #003366;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid #dee2e6;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  transition: 0.2s;
+  font-family: "Poppins", sans-serif;
+  color: #333;
+}
+
+.filter-btn:hover {
+  background: #f8f9fa;
+  border-color: #003366;
+}
+
+.filter-btn.active {
+  background: #003366;
+  color: #fff;
+  border-color: #003366;
+}
+
+/* custom picker */
+.custom-picker {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.custom-picker label {
+  color: var(--muted);
+  font-size: 13px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+}
+
+.custom-picker input[type="date"] {
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: "Poppins", sans-serif;
+}
+
+.custom-picker input[type="date"]:hover {
+  border-color: #003366;
+}
+
+.custom-picker input[type="date"]:focus {
+  outline: none;
+  border-color: #003366;
+  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+.apply-btn {
+  padding: 8px 16px;
+  background: #003366;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+  transition: 0.2s;
+}
+
+.apply-btn:hover {
+  background: #004080;
+}
+
+/* results section */
+.results-section {
+  margin-top: 20px;
+}
+
+.results-section h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #003366;
+  margin-bottom: 16px;
+  font-family: "Poppins", sans-serif;
+}
+
+/* table section */
+.table-section {
+  margin-top: 20px;
+  background: var(--card);
+  padding: 20px;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.reports-tabs {
+  margin-top: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.reports-tabs .nav-link {
+  font-weight: 500;
+  color: #003366;
+  border: none;
+  padding: 10px 18px;
+}
+
+.reports-tabs .nav-link.active {
+  background-color: #003366;
+  color: #fff;
+  border-radius: 6px 6px 0 0;
+}
+
+.summary-card {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: var(--radius);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.summary-card__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summary-card__value {
+  text-align: right;
+}
+
+.summary-card .dept-filter {
+  min-width: 180px;
+}
+
+.summary-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #003366;
+}
+
+.summary-amount {
+  font-size: 24px;
+  font-weight: 600;
+  color: #003366;
+}
+
+.dept-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dept-summary-table thead th {
+  text-align: left;
+  padding: 12px;
+  font-weight: 600;
+  color: #003366;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.dept-summary-table tbody td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.grand-total-row {
+  background: #e8f1ff;
+}
+
+.grand-total-row td {
+  font-weight: 600;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-family: "Poppins", sans-serif;
+}
+
+thead th {
+  text-align: left;
+  padding: 12px;
+  color: #003366;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+
+tbody td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  color: #333;
+}
+
+/* department filter in header */
+.dept-label {
+  font-weight: 600;
+  color: #003366;
+  margin-right: 10px;
+  vertical-align: middle;
+  display: inline-block;
+  font-family: "Poppins", sans-serif;
+}
+
+.th-select-wrapper {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.dept-filter,
+#departmentFilter {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 6px 30px 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 13px;
+  min-width: 100px;
+  color: #333;
+  font-family: "Poppins", sans-serif;
+}
+
+.dept-filter:hover,
+#departmentFilter:hover {
+  border-color: #003366;
+}
+
+.dept-filter:focus,
+#departmentFilter:focus {
+  outline: none;
+  border-color: #003366;
+  box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+}
+
+.th-select-wrapper::after {
+  content: "▾";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.th-select-wrapper:hover::after,
+.th-select-wrapper:focus-within::after {
+  color: #003366;
+}
+
+/* status badges */
+.status {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
+  font-family: "Poppins", sans-serif;
+  display: inline-block;
+}
+
+.status.pending {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.status.completed {
+  background: rgba(40, 167, 69, 0.15);
+  color: #28a745;
+}
+
+.status.inprogress {
+  background: rgba(0, 123, 255, 0.15);
+  color: #007bff;
+}
+
+.status.rejected {
+  background: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+.btn-view {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #007bff;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  text-decoration: none;
+  display: inline-block;
+  font-family: "Poppins", sans-serif;
+  transition: 0.2s;
+}
+
+.btn-view:hover {
+  background: #0056b3;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* footer */
+footer {
+  background: #003366;
+  color: #fff;
+  text-align: center;
+  padding: 16px 12px;
+  margin-top: 40px;
+  font-family: "Poppins", sans-serif;
+}
+
+footer .team-names {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 6px 0;
+  color: #fff;
+}
+
+footer .copyright {
+  margin: 0;
+  font-size: 12px;
+  color: #e0e0e0;
+  opacity: 0.9;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .reports-page {
+    padding: 0 15px;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .custom-picker {
+    margin-left: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .dept-filter,
+  #departmentFilter {
+    min-width: 100px;
+    font-size: 12px;
+  }
+
+  .reports-header h1 {
+    font-size: 24px;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  thead th,
+  tbody td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reports-header h1 {
+    font-size: 20px;
+  }
+
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

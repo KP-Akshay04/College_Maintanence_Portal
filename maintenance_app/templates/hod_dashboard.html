@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}HOD Dashboard | College Maintenance Portal{% endblock %}
+  <link rel="icon" href="{% static "images/logo4.jpg" %}">
+
+{% block content %}
+<style>
+  /* Header with New Request button */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  background:white;
+}
+
+.btn-new {
+  background: #003366;
+  color: white;
+  text-decoration: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.btn-new:hover {
+  background: #0055aa;
+}
+
+/* Responsive header layout */
+@media (max-width: 600px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .btn-new {
+    width: 100%;
+    text-align: center;
+  }
+}
+</style>
+
+<link rel="stylesheet" href="{% static 'css/admin.css' %}">
+
+<section class="dashboard">
+ <div class="dashboard-header">
+    <h1>HOD Dashboard</h1>
+    <a href="{% url 'new_request' %}" class="btn-new">+ New Request</a>
+  </div>
+  <b><p>Welcome back, {{ user.username }}! Here are your department’s maintenance requests.</p></b>
+
+  <!-- Summary Cards -->
+  <div class="cards">
+    <a href="{% url 'hod_dashboard' %}" class="card {% if not status_filter %}active{% endif %}">
+      <h3>Total Requests</h3>
+      <p>{{ total }}</p>
+    </a>
+    <a href="?status=Pending" class="card {% if status_filter == 'Pending' %}active{% endif %}">
+      <h3>Pending</h3>
+      <p>{{ pending }}</p>
+    </a>
+    <a href="?status=Approved" class="card {% if status_filter == 'Approved' %}active{% endif %}">
+      <h3>Approved</h3>
+      <p>{{ approved }}</p>
+    </a>
+    <a href="?status=Rejected" class="card {% if status_filter == 'Rejected' %}active{% endif %}">
+      <h3>Rejected</h3>
+      <p>{{ rejected }}</p>
+    </a>
+  </div>
+
+  <!-- Requests Table -->
+  <div class="table-section" id="table">
+    <h2>Maintenance Requests</h2>
+    {% if requests %}
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Branch</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in requests %}
+          <tr>
+            <td>{{ r.title }}</td>
+            <td>{{ r.branch }}</td>
+            <td><span class="status {{ r.status }}">{{ r.status }}</span></td>
+            <td>{{ r.date_submitted|date:"d M Y, H:i" }}</td>
+            <td><a href="{% url 'request_detail' r.pk %}" class="btn-action">View</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted text-center">No maintenance requests yet.</p>
+    {% endif %}
+  </div>
+</section>
+
+<footer>
+  <p>© TECH MAVERICKS | All Rights Reserved</p>
+</footer>
+
+{% endblock %}
