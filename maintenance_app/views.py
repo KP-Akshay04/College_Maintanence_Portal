@@ -23,7 +23,7 @@ import uuid, json
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import MaintenanceRequest, QuotationBatch, QuotationResponse, QuotationItem
 from django.http import JsonResponse
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Value, F, FloatField
 from django.db.models.functions import Coalesce
 
 
@@ -579,100 +579,101 @@ def user_logout(request):
 
 from django.shortcuts import render
 
+from django.core.exceptions import FieldError
+import decimal
+
+# --- SAFE fallback for reports (paste in views.py) ---
+import json
+from django.contrib.auth.decorators import login_required, user_passes_test
+
 @login_required
 @user_passes_test(is_admin)
 def approved_quotations_reports_view(request):
     """
-    Separate backend endpoint to display only approved quotations on the reports page.
-    Approved quotations are those marked as selected=True in quotation_batch_detail.html
+    Render the reports page with approved maintenance requests and selected quotation totals.
     """
-    status = request.GET.get('status') or ''
-    department = request.GET.get('department') or ''
-
-    # Get all approved quotations (selected=True from quotation_batch_detail.html)
-    approved_quotations = QuotationResponse.objects.filter(selected=True).select_related('batch')
-    
-    # Get maintenance requests that have approved quotations through QuotationItem
-    requests_qs = (
-        MaintenanceRequest.objects.filter(quotationitem__quotation__selected=True)
+    approved_requests = (
+        MaintenanceRequest.objects.filter(status='Approved')
         .annotate(
             approved_total=Coalesce(
                 Sum(
                     'quotationitem__subtotal',
-                    filter=Q(quotationitem__quotation__selected=True)
+                    filter=Q(quotationitem__quotation__selected=True),
+                    output_field=FloatField(),
                 ),
-                0.0
+                Value(0.0),
+                output_field=FloatField(),
             )
         )
         .order_by('-date_submitted')
-        .distinct()
     )
 
-    # Apply filters
-    if status:
-        requests_qs = requests_qs.filter(status=status)
-    if department:
-        requests_qs = requests_qs.filter(branch=department)
-
-    # Departments for dropdown (based on all approved quotations)
     departments = list(
-        MaintenanceRequest.objects.filter(quotationitem__quotation__selected=True)
+        MaintenanceRequest.objects.filter(status='Approved')
+        .exclude(branch__isnull=True)
+        .exclude(branch__exact='')
         .values_list('branch', flat=True)
-        .order_by('branch')
         .distinct()
+        .order_by('branch')
     )
 
-    # Department totals (subtotal of approved quotations per department)
-    totals_base = MaintenanceRequest.objects.filter(quotationitem__quotation__selected=True)
-    if status:
-        totals_base = totals_base.filter(status=status)
-    if department:
-        totals_base = totals_base.filter(branch=department)
-
-    grand_total = totals_base.aggregate(
-        total=Coalesce(
-            Sum(
-                'quotationitem__subtotal',
-                filter=Q(quotationitem__quotation__selected=True)
-            ),
-            0.0
+    department_totals_qs = (
+        QuotationItem.objects.filter(quotation__selected=True)
+        .values(branch=F('request__branch'))
+        .annotate(
+            department_total=Coalesce(
+                Sum('subtotal', output_field=FloatField()),
+                Value(0.0),
+                output_field=FloatField(),
+            )
         )
-    )['total'] or 0.0
+        .order_by('branch')
+    )
 
-    department_totals_qs = totals_base.values('branch').annotate(
-        department_total=Coalesce(
-            Sum(
-                'quotationitem__subtotal',
-                filter=Q(quotationitem__quotation__selected=True)
-            ),
-            0.0
-        )
-    ).order_by('branch')
+    department_totals = list(department_totals_qs)
 
-    department_totals_list = list(department_totals_qs)
+    department_totals_raw = {}
+    for item in department_totals:
+        branch_key = item['branch'] or None
+        department_totals_raw[branch_key] = float(item['department_total'] or 0)
+
+    # Ensure every department appears with at least zero
+    for branch in departments:
+        department_totals_raw.setdefault(branch, 0.0)
+
+    department_totals_output = [
+        {'branch': branch, 'department_total': department_totals_raw.get(branch, 0.0)}
+        for branch in departments
+    ]
+
+    # Include requests without a branch label, if present
+    if None in department_totals_raw and None not in [item['branch'] for item in department_totals_output]:
+        department_totals_output.append({'branch': None, 'department_total': department_totals_raw[None]})
+
     department_totals_map = {
-        item['branch']: float(item['department_total'] or 0)
-        for item in department_totals_list
+        (branch if branch else 'Not specified'): total
+        for branch, total in department_totals_raw.items()
     }
+
+    grand_total = sum(department_totals_map.values())
 
     context = {
-        'requests': requests_qs,
+        'requests': approved_requests,
         'departments': departments,
-        'department_totals': department_totals_list,
+        'department_totals': department_totals_output,
         'department_totals_json': json.dumps(department_totals_map),
-        'grand_total': float(grand_total),
-        'approved_quotations': approved_quotations,  # Include approved quotations data
+        'grand_total': grand_total,
     }
-
     return render(request, 'reports.html', context)
-
 
 @login_required
 @user_passes_test(is_admin)
 def reports_view(request):
-    """View for displaying maintenance reports with filtering."""
-    # Use the approved quotations view for consistency
+    # alias to the safe view
     return approved_quotations_reports_view(request)
+# --- end safe fallback ---
+
+
 
 def department_list(request):
     return render(request, 'department_list.html')

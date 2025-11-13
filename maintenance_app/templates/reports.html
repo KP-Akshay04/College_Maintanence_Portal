@@ -191,9 +191,20 @@
 
   <!-- Scripts -->
   <script>
-    window.DEPARTMENT_TOTALS = JSON.parse('{{ department_totals_json|default:'{}'|escapejs }}');
-    window.GRAND_TOTAL = {{ grand_total|default:0|floatformat:"2" }};
-  </script>
+    (function() {
+      var deptJson = "{{ department_totals_json|default:'{}'|escapejs }}";
+      try {
+        window.DEPARTMENT_TOTALS = deptJson ? JSON.parse(deptJson) : {};
+      } catch (e) {
+        console.error("Failed to parse department_totals_json:", e);
+        window.DEPARTMENT_TOTALS = {};
+      }
+  
+      var grandStr = "{{ grand_total|default:0|floatformat:'2' }}";
+      var g = parseFloat(String(grandStr).replace(/,/g, ''));
+      window.GRAND_TOTAL = isNaN(g) ? 0.0 : g;
+    })();
+  </script>  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="{% static 'js/reports.js' %}"></script>
 </body>
